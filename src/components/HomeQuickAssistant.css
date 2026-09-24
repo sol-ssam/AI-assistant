@@ -1,0 +1,101 @@
+.home-quick-assistant__log {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.home-quick-assistant__msg {
+  margin: 0;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.home-quick-assistant__msg--user {
+  align-self: flex-end;
+  background: var(--accent-soft);
+  color: var(--text-primary);
+  max-width: 90%;
+}
+
+.home-quick-assistant__msg--assistant {
+  background: var(--bg-card-soft);
+  color: var(--text-primary);
+  border: 1px solid var(--border-soft);
+}
+
+.home-quick-assistant__msg--error {
+  background: var(--danger-soft-bg);
+  color: var(--text-primary);
+}
+
+.home-quick-assistant__msg--loading {
+  color: var(--text-secondary);
+  font-style: normal;
+}
+
+.home-quick-assistant__form {
+  display: flex;
+  gap: 8px;
+}
+
+.home-quick-assistant__form input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  font-size: 14.5px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+
+.home-quick-assistant__form input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.home-quick-assistant__form input::placeholder {
+  color: var(--text-secondary);
+}
+
+.home-quick-assistant__form button {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-quick-assistant__form button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.home-quick-assistant__form button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.home-quick-assistant__hint {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}

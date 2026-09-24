@@ -1,0 +1,18 @@
+.placeholder {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 56px 40px 80px;
+}
+
+.placeholder__title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  margin: 0 0 12px;
+}
+
+.placeholder__desc {
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  margin: 0;
+}

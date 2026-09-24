@@ -1,0 +1,296 @@
+.login {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-main);
+  padding: 48px 24px 64px;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-family-base);
+}
+
+/* 카드 뒤에서 아주 은은하게 퍼지는 배경 장식 - 경계가 보이는 사각형/패널로 보이지
+   않는다. .login에 overflow:hidden이 있어 어떤 화면 폭에서도 가로로 넘치지 않는다. */
+.login__glow {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 620px;
+  height: 620px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 50% 50% at 50% 50%,
+    var(--accent-soft) 0%,
+    rgba(0, 102, 204, 0.12) 35%,
+    transparent 65%
+  );
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.login__layout {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1040px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+/* ===== 왼쪽(또는 위): 브랜드 + 로그인 버튼 ===== */
+.login__card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-soft);
+  padding: 44px 40px;
+  flex: 1 1 380px;
+  max-width: 440px;
+  min-width: 0;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.login__title {
+  font-family: var(--font-family-base);
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0 0 12px;
+  color: var(--text-primary);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.login__description {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  margin: 0 0 28px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.login__button {
+  width: 100%;
+  padding: 13px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-size: 14.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.login__button:hover {
+  filter: brightness(0.94);
+}
+
+.login__button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.login__button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+/* '게스트로 체험하기' - Google 로그인보다 시각적으로 한 단계 낮은 보조 액션(윤곽선 버튼) */
+.login__button--secondary {
+  margin-top: 10px;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.login__button--secondary:hover {
+  filter: none;
+  background: var(--accent-soft);
+}
+
+/* 게스트 안내 - 두 문장을 브라우저의 자동 줄바꿈에만 맡기지 않고 각각 별도 문단(<p>)으로
+   분리해, 카드 폭이 좁아져도 문장 중간이 아니라 문장 사이에서만 줄이 바뀌게 한다. */
+.login__preview-hint {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.login__preview-hint p {
+  margin: 0;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.login__preview-hint p + p {
+  margin-top: 2px;
+}
+
+.login__error {
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: var(--danger-soft);
+  background: var(--danger-soft-bg);
+  border-radius: 10px;
+  padding: 10px 14px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 보안 안내 - "확인 위주" 안내이므로 오류(danger)가 아니라 accent-soft 톤으로 차분하게 표현한다 */
+.login__security-note {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: var(--accent-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  text-align: left;
+}
+
+.login__security-note p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.login__security-note p + p {
+  margin-top: 6px;
+}
+
+.login__legal-links {
+  margin: 18px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.login__legal-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.login__legal-links a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* ===== 오른쪽(또는 아래): 기능 소개 + 사용 방법 ===== */
+.login__info {
+  flex: 1 1 380px;
+  max-width: 480px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login__section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 14px;
+  word-break: keep-all;
+}
+
+.login__feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.login__feature-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: var(--shadow-soft);
+  min-width: 0;
+}
+
+.login__feature-icon {
+  display: block;
+  font-size: 20px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.login__feature-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.login__feature-desc {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  margin: 0;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.login__steps {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow-soft);
+}
+
+.login__steps-list {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login__steps-list li {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 860px) {
+  .login__layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .login__card,
+  .login__info {
+    width: 100%;
+    max-width: 480px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login {
+    padding: 32px 16px 48px;
+  }
+
+  .login__card {
+    padding: 32px 24px;
+  }
+
+  .login__feature-grid {
+    grid-template-columns: 1fr;
+  }
+}

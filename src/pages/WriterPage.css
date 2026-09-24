@@ -1,0 +1,350 @@
+.writer-page {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 48px 40px 80px;
+  font-family: var(--font-family-base);
+  color: var(--text-primary);
+}
+
+.writer-page__head {
+  margin-bottom: 24px;
+}
+
+.writer-page__title {
+  font-family: var(--font-family-base);
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 8px;
+  color: var(--text-primary);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.writer-page__desc {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.writer-page__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.writer-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 20px;
+  padding: 24px 26px;
+  box-shadow: var(--shadow-soft);
+  min-width: 0;
+}
+
+/* ===== 왼쪽: 조건 선택 + 입력 ===== */
+.writer-field {
+  margin-bottom: 18px;
+}
+
+.writer-field:last-child {
+  margin-bottom: 0;
+}
+
+.writer-field__label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.writer-field__label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.writer-field__label-row label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.writer-field__count {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* 선택 UI - 작은 화면에서도 잘리지 않고 자연스럽게 다음 줄로 넘어가는 chip row */
+.writer-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.writer-chip {
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  background: var(--bg-card-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  padding: 7px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.writer-chip:hover {
+  background: var(--accent-soft);
+  color: var(--text-primary);
+}
+
+.writer-chip--active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-soft);
+  font-weight: 600;
+}
+
+.writer-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.writer-chip:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.writer-textarea {
+  width: 100%;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.writer-textarea:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.writer-textarea:disabled {
+  background: var(--bg-card-soft);
+  color: var(--text-secondary);
+}
+
+/* "기타" 선택 시 나타나는 한 줄 유형 직접 입력란 - .writer-textarea와 같은 톤이되 한 줄용.
+   label에는 기존 .writer-field__label을 그대로 재사용한다(새 규칙을 추가하지 않음). */
+.writer-input {
+  width: 100%;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.writer-input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.writer-input:disabled {
+  background: var(--bg-card-soft);
+  color: var(--text-secondary);
+}
+
+.writer-field__warning {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--accent-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  padding: 8px 12px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.writer-examples {
+  margin-bottom: 18px;
+}
+
+.writer-examples__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.writer-example-btn {
+  font-size: 12.5px;
+  font-family: inherit;
+  color: var(--accent);
+  background: var(--bg-card);
+  border: 1px solid var(--accent-soft);
+  border-radius: 999px;
+  padding: 7px 14px;
+  cursor: pointer;
+  text-align: left;
+  word-break: keep-all;
+}
+
+.writer-example-btn:hover {
+  background: var(--accent-soft);
+}
+
+.writer-example-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.writer-example-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.writer-page__generate-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.writer-page__form-card .writer-page__generate-row .btn {
+  padding: 10px 22px;
+  border-radius: 999px;
+}
+
+/* ===== 오른쪽: 결과 ===== */
+.writer-page__result-card {
+  min-height: 200px;
+}
+
+.writer-loading,
+.writer-result-empty {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.writer-error {
+  font-size: 13.5px;
+  color: var(--danger-soft);
+  margin: 0;
+}
+
+.writer-result {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.writer-result__pii-note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--accent-soft);
+  border-radius: 10px;
+  padding: 8px 12px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.writer-result__block {
+  min-width: 0;
+}
+
+.writer-result__block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.writer-result__block-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* 긴 결과가 카드 밖으로 넘치지 않도록 하면서도 줄바꿈은 그대로 보존한다 */
+.writer-result__text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-primary);
+  background: var(--bg-card-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 12px 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.writer-refine-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.writer-result__disclaimer {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-soft);
+  padding-top: 12px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 900px) {
+  .writer-page__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .writer-page {
+    padding: 28px 16px 60px;
+  }
+
+  .writer-card {
+    padding: 18px 16px;
+  }
+
+  .writer-page__generate-row {
+    justify-content: stretch;
+  }
+
+  .writer-page__generate-row .btn {
+    width: 100%;
+  }
+
+  .writer-refine-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .writer-refine-row .btn {
+    width: 100%;
+  }
+}

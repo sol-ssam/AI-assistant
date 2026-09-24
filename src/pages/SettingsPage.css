@@ -1,0 +1,388 @@
+.settings-page {
+  max-width: 800px;
+  padding: 48px 40px 90px;
+  font-family: var(--font-family-base);
+  color: var(--text-primary);
+}
+
+.settings-page .page__title {
+  font-family: var(--font-family-base);
+  font-weight: 800;
+}
+
+.settings-page .page__desc {
+  color: var(--text-secondary);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* ===== compact setting card ===== */
+.setting-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow-soft);
+}
+
+.setting-card + .setting-card,
+.setting-advanced-toggle + .setting-card {
+  margin-top: 14px;
+}
+
+.setting-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.setting-card__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-family-base);
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.setting-card__head .setting-card__title {
+  margin-bottom: 0;
+}
+
+.setting-card__status {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-card-soft);
+  border-radius: 999px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+.setting-card__status--ok {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.setting-card__desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 10px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.setting-card__helper {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0 0 10px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.setting-card__saved {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Desktop: label+control+저장이 자연스럽게 한 행에. Mobile은 미디어쿼리로 세로 배치 */
+.setting-card__row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.setting-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.setting-card__field--disabled {
+  opacity: 0.55;
+}
+
+.setting-card__field input,
+.setting-card input[type="time"] {
+  border: 1px solid var(--border-soft);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-radius: 10px;
+  padding: 8px 11px;
+  font-size: 13.5px;
+  font-family: inherit;
+}
+
+.setting-card__field input:focus-visible,
+.setting-card input[type="time"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.setting-card__field input:disabled {
+  background: var(--bg-card-soft);
+  color: var(--text-secondary);
+  cursor: default;
+}
+
+/* 학년/반 - 저장값(예: "3", "6")은 그대로 두고, input 옆에 "학년"/"반" suffix만 시각적으로 붙인다 */
+.setting-card__suffix-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.setting-card__suffix-input input {
+  width: 64px;
+}
+
+.setting-card__suffix {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.setting-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.setting-card__link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.setting-card__link:hover {
+  text-decoration: underline;
+}
+
+.setting-card__radio-group {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+
+.setting-card__radio {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+/* ===== 근무시간 설정 - 요일 토글 / 집중 시간 선택지 (같은 chip 스타일 공유) ===== */
+.work-hours-field {
+  margin-bottom: 14px;
+}
+
+.work-hours-field:last-of-type {
+  margin-bottom: 0;
+}
+
+.work-hours-field__label {
+  display: block;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.work-hours-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.work-hours-day {
+  min-width: 40px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.work-hours-day:hover {
+  background: var(--bg-card-soft);
+}
+
+/* 선택된 요일/기준은 진한 accent 배경 + 흰 글자로, 선택되지 않은 항목과 색만으로도
+   확실히 구분되게 한다(요구사항: 시각적으로 명확한 구분). */
+.work-hours-day--active,
+.work-hours-day--active:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.work-hours-day:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.setting-card__advanced-divider {
+  height: 1px;
+  background: var(--border-soft);
+  margin: 16px 0;
+}
+
+/* ===== 버튼 ===== */
+.settings-page .btn {
+  display: inline-block;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.settings-page .btn:hover {
+  filter: brightness(0.95);
+}
+
+.settings-page .btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.settings-page .btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-soft);
+}
+
+.settings-page .btn--ghost:hover {
+  background: var(--bg-card-soft);
+  filter: none;
+}
+
+.settings-page .btn--small {
+  padding: 7px 14px;
+  font-size: 12.5px;
+}
+
+/* 데이터 초기화 - 일반 rose primary와 구분되는 danger outline */
+.settings-page .btn--danger-outline {
+  background: var(--bg-card);
+  color: var(--danger-soft);
+  border: 1px solid var(--danger-soft);
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settings-page .btn--danger-outline:hover {
+  background: var(--danger-soft-bg);
+}
+
+/* 고급 설정 토글 - 눈에 띄지 않는 작은 text button */
+.setting-advanced-toggle {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 8px 4px;
+  margin-top: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.setting-advanced-toggle:hover {
+  color: var(--accent);
+}
+
+.setting-advanced-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.settings-page .list--empty {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.settings-page .status--error {
+  color: var(--danger-soft);
+}
+
+/* 서비스 정보 - 큰 카드가 아니라 페이지 맨 아래의 작은 푸터. 흰 카드 배경/그림자/아이콘을
+   전부 없애고, 위쪽 구분선 하나로만 앞의 고급 설정 영역과 나눈다. */
+.settings-page__footer {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-soft);
+  text-align: center;
+}
+
+.settings-page__footer-title {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+
+.settings-page__footer-links {
+  margin: 0;
+  font-size: 13px;
+}
+
+.settings-page__footer-links a {
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.settings-page__footer-links a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.settings-page__footer-links a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (max-width: 640px) {
+  .settings-page {
+    padding: 32px 20px 60px;
+  }
+
+  .setting-card__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .setting-card__actions {
+    margin-top: 4px;
+  }
+}

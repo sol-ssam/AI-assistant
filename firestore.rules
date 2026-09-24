@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // settings 컬렉션: 문서 ID가 곧 사용자 uid
+    match /settings/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // 그 외 모든 업무 데이터 컬렉션: ownerId 필드로 소유자를 확인한다.
+    match /{collection}/{docId} {
+      allow read: if request.auth != null
+        && collection in ['timetable', 'timetable_overrides', 'lesson_plan',
+                           'class_progress', 'events', 'tasks',
+                           'source_documents', 'homeroom_timetable', 'progress_plans', 'progress_checks', 'school_day_schedules', 'lesson_adjustments', 'progress_current', 'progress_history']
+        && resource.data.ownerId == request.auth.uid;
+
+      allow create: if request.auth != null
+        && collection in ['timetable', 'timetable_overrides', 'lesson_plan',
+                           'class_progress', 'events', 'tasks',
+                           'source_documents', 'homeroom_timetable', 'progress_plans', 'progress_checks', 'school_day_schedules', 'lesson_adjustments', 'progress_current', 'progress_history']
+        && request.resource.data.ownerId == request.auth.uid;
+
+      allow update: if request.auth != null
+        && collection in ['timetable', 'timetable_overrides', 'lesson_plan',
+                           'class_progress', 'events', 'tasks',
+                           'source_documents', 'homeroom_timetable', 'progress_plans', 'progress_checks', 'school_day_schedules', 'lesson_adjustments', 'progress_current', 'progress_history']
+        && resource.data.ownerId == request.auth.uid
+        && request.resource.data.ownerId == request.auth.uid;
+
+      allow delete: if request.auth != null
+        && collection in ['timetable', 'timetable_overrides', 'lesson_plan',
+                           'class_progress', 'events', 'tasks',
+                           'source_documents', 'homeroom_timetable', 'progress_plans', 'progress_checks', 'school_day_schedules', 'lesson_adjustments', 'progress_current', 'progress_history']
+        && resource.data.ownerId == request.auth.uid;
+    }
+  }
+}

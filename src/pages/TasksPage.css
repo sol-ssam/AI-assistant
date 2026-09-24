@@ -1,0 +1,237 @@
+.tasks-page {
+  max-width: 800px;
+  padding: 48px 40px 90px;
+  font-family: var(--font-family-base);
+  color: var(--text-primary);
+}
+
+.tasks-page .page__title {
+  font-family: var(--font-family-base);
+  font-weight: 800;
+}
+
+.tasks-page .page__desc {
+  color: var(--text-secondary);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.tp-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.tasks-page .form {
+  background: var(--bg-card-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.tasks-page .field input,
+.tasks-page .field select {
+  border: 1px solid var(--border-soft);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-radius: 10px;
+  padding: 8px 11px;
+}
+
+.tasks-page .btn {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tasks-page .btn:hover {
+  filter: brightness(0.95);
+}
+
+.tasks-page .btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-soft);
+}
+
+.tasks-page .btn--ghost:hover {
+  background: var(--bg-card-soft);
+  filter: none;
+}
+
+.tasks-page .status {
+  color: var(--text-secondary);
+}
+
+.tasks-page .status--error {
+  color: var(--danger-soft);
+}
+
+.tasks-page .list--empty {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  padding: 16px 0;
+}
+
+.tasks-page .list__actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+/* ===== 업무 목록 ===== */
+.tp-list {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  padding: 6px 20px;
+  box-shadow: var(--shadow-soft);
+}
+
+.tp-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.tp-row:last-child {
+  border-bottom: none;
+}
+
+.tp-row__main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tp-row__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 3px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tp-row__title--done {
+  color: var(--text-secondary);
+  text-decoration: line-through;
+  text-decoration-color: var(--border-soft);
+}
+
+.tp-row__meta {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin: 0;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* ===== custom checkbox - 실제 checkbox semantics는 유지, 시각만 커스텀 ===== */
+.tp-checkbox {
+  position: relative;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+.tp-checkbox input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.tp-checkbox__box {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 1.5px solid var(--border-soft);
+  background: var(--bg-card);
+}
+
+.tp-checkbox input:checked + .tp-checkbox__box {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  position: relative;
+}
+
+.tp-checkbox input:checked + .tp-checkbox__box::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tp-checkbox input:focus-visible + .tp-checkbox__box {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ===== 중요도 badge ===== */
+.tasks-page .badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.tasks-page .badge--high {
+  background: var(--danger-soft-bg);
+  color: var(--danger-soft);
+}
+
+.tasks-page .badge--medium {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.tasks-page .badge--low {
+  background: var(--bg-card-soft);
+  color: var(--text-secondary);
+}
+
+@media (max-width: 640px) {
+  .tasks-page {
+    padding: 32px 20px 60px;
+  }
+
+  .tp-list {
+    padding: 4px 14px;
+  }
+
+  .tp-row {
+    flex-wrap: wrap;
+  }
+
+  .list__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

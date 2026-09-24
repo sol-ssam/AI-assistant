@@ -1,0 +1,76 @@
+/* 설정으로 돌아가기 링크 - SettingsPage의 .setting-card__link와 같은 톤(악센트 색,
+   hover 시 밑줄)을 그대로 따른다. */
+.trash-page__back {
+  display: inline-block;
+  margin-bottom: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.trash-page__back:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.trash-page__back:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Google Calendar 연결 배지 - crud-shared.css의 .badge를 기반으로, 이미 그 파일이 쓰는
+   같은 계열 색(.badge--work와 동일한 --calendar 토큰)만 이 페이지에서 추가한다. */
+.trash-page .badge--calendar {
+  background: var(--calendar-bg);
+  color: var(--calendar);
+}
+
+/* 폼이 없는 화면이라 EventsPage.css의 .ep-result-message를 그대로 가져올 수 없어, 같은
+   레이아웃(메시지 + 닫기 버튼을 한 줄에)만 이 페이지 전용 클래스로 재정의한다. */
+.trash-page__result-message {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trash-page__result-message .status {
+  margin: 12px 0;
+}
+
+.trash-page__modal-helper {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin: 0 0 12px;
+}
+
+/* 상단 보관 정책 안내(Calendar 연결 일정 예외) - page__desc보다 한 단계 낮은 톤으로,
+   SettingsPage의 .setting-card__helper와 같은 크기·색을 쓴다. */
+.trash-page__policy-note {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin: 4px 0 0;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 목록 행 - crud-shared.css의 .list__row(제목/메타 + 오른쪽 버튼)를 그대로 쓰되, 제목과
+   메타가 위쪽에 정렬되도록만 조정한다(기존 .list__row는 align-items: center). */
+.trash-page .list__row {
+  align-items: flex-start;
+}
+
+@media (max-width: 640px) {
+  /* 모바일에서는 제목/메타 영역과 버튼 영역을 세로로 쌓아 가로 스크롤 없이 표시한다 -
+     .setting-card__row의 모바일 처리와 같은 원칙(SettingsPage.css 참고). */
+  .trash-page .list__row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .trash-page .list__actions {
+    justify-content: flex-end;
+  }
+}

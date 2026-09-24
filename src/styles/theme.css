@@ -1,0 +1,105 @@
+:root {
+  /* =========================================================================
+     디자인 토큰 - Apple 스타일 clean/minimal 팔레트.
+     클래스명과 변수명은 그대로 두고 "값"만 교체했다 - 이 파일을 쓰는 모든 페이지/
+     컴포넌트가 코드 변경 없이 새 팔레트를 그대로 물려받는다.
+     ========================================================================= */
+
+  /* ----- 배경 ----- */
+  --bg-main: #f5f5f7; /* 앱 전체 배경 */
+  --bg-card: #ffffff; /* 카드/패널 배경 */
+  --bg-card-soft: #fafafb; /* 카드 안의 은은한 보조 영역(hover, 폼 패널 등) */
+  --bg-sidebar: #ffffff; /* Sidebar 배경 */
+  --bg-sidebar-active: #e4effc; /* 선택된 메뉴 배경 */
+
+  /* ----- 텍스트 ----- */
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+
+  /* ----- 구분선/테두리 ----- */
+  --border-soft: #e5e5ea;
+
+  /* ----- Primary accent (버튼/링크/선택 상태 등 제한적으로만 사용) ----- */
+  --accent: #0066cc;
+  --accent-soft: #e8f1fc;
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.05);
+
+  /* ----- 상태 색상 (의미는 기존과 동일하게 유지, 톤만 전체 팔레트에 맞게 조정) ----- */
+  --danger-soft: #c5372e; /* 오류/위험 */
+  --danger-soft-bg: #fbeae9;
+  --urgent: #c5372e; /* 🔴 오늘 반드시 확인 */
+  --urgent-bg: #fbeae9;
+  --prep: #b1690a; /* 🟡 곧 준비 필요 */
+  --prep-bg: #fbf0dd;
+  --calendar: #0066cc; /* 📅 일정 */
+  --calendar-bg: #e8f1fc;
+  --class: #1e8e3e; /* 📚 수업 / 진도 */
+  --class-bg: #e6f4ea;
+
+  /* ----- 과거 "칠판/종이" 테마 변수명 - 값만 새 팔레트로 정리해 그대로 둔다
+     (App.css/Modal.css/PlaceholderPage.css 등 일부 파일이 계속 참조한다). ----- */
+  --paper: var(--bg-main);
+  --paper-line: var(--border-soft);
+  --ink: var(--text-primary);
+  --ink-soft: var(--text-secondary);
+
+  /* ----- 폰트 - 이번 작업에서 변경하지 않는다 ----- */
+  --font-display: "Paperlogy", "Noto Serif KR", serif;
+  --font-body: "Paperlogy", "Noto Sans KR", sans-serif;
+  --font-family-base: var(--font-body);
+
+  --sidebar-width: 216px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--paper);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* 개별 컴포넌트가 이미 자기만의 focus-visible 스타일을 정의한 경우 그 selector가
+   더 구체적이라 항상 우선한다 - 이 규칙은 아직 focus 표시가 없는 요소를 위한
+   전역 기본값이다(접근성 - 키보드 포커스 항상 보이게). */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* 브랜드 아이콘(BrandIcon.jsx) - 사이드바와 앱 로딩 화면이 공유하는 남색 원형 + 흰색
+   반짝임 마크. width/height는 컴포넌트의 size prop으로 인라인 지정되므로 여기서는
+   모양만 정의한다. */
+.brand-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.brand-icon svg {
+  width: 58%;
+  height: 58%;
+}

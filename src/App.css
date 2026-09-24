@@ -1,0 +1,41 @@
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app-main {
+  flex: 1;
+  background: var(--paper);
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  /* Sidebar.jsx가 렌더링하는 mobile-header/backdrop/drawer가 app-shell의 형제로 함께
+     들어오므로, 이 폭에서는 app-shell을 세로 방향으로 바꿔 mobile-header가 app-main
+     위에 자연스럽게 쌓이게 한다(Desktop의 flex row 레이아웃은 그대로 유지). */
+  .app-shell {
+    flex-direction: column;
+  }
+}
+
+.app-loading {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--bg-main);
+  font-family: var(--font-family-base);
+}
+
+.app-loading__brand {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.app-loading__text {
+  font-size: 13px;
+  color: var(--text-secondary);
+}

@@ -1,0 +1,465 @@
+.home {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 56px 48px 90px;
+  background: var(--bg-main);
+  min-height: 100%;
+  font-family: var(--font-family-base);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+.home__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 40px;
+  position: relative;
+  /* 헤더 배경 자체에 아주 은은한 rose wash를 줘서, 떠 있는 원형 장식 대신 배경처럼
+     자연스럽게 느껴지게 한다(요청하신 옵션 A - 장식 제거 방향). */
+  padding: 8px 8px 8px 0;
+}
+
+.home__head-text {
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.home__greeting {
+  font-family: var(--font-family-base);
+  font-size: 29px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+  color: var(--text-primary);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.home__subgreeting {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin: 0 0 12px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.home__date {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin: 0 0 18px;
+}
+
+.home__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+/* pill은 상태 요약 정보이지 버튼이 아니다 - hover 효과를 주지 않는다 */
+.home__summary-pill {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.home__summary-pill strong {
+  color: var(--accent);
+  font-weight: 700;
+  margin-left: 3px;
+}
+
+.home__summary-badge {
+  font-size: 12px;
+  color: var(--accent);
+  padding: 6px 12px;
+  background: var(--accent-soft);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* 요청하신 옵션 A: 떠 있는 원형 장식 대신, header 배경 자체에 아주 옅은 radial wash를
+   깔아 자연스러운 배경 느낌만 남긴다. 새 이미지 asset은 쓰지 않는다. */
+/* 인사말("○○님 안녕하세요 🌷") 주변에서만 아주 은은하게 퍼지는 glow. 예전에는 header
+   오른쪽 위에 고정 크기의 사각형 요소로 떠 있어서 별도 배너처럼 보였다 - 이번에는
+   .home__head-text(인사말이 실제로 있는 영역)를 기준으로 중심을 옮기고, 박스 자체를
+   충분히 크게 잡아서 gradient가 박스 경계에 닿기 훨씬 전에 이미 완전히 투명해지도록
+   했다(경계가 보이면 실패). 여러 개의 옅은 stop을 둬서 더 부드럽게 사라진다.
+   .home__head-text에 z-index:1이 있어 텍스트가 항상 glow 위에 그려진다. */
+.home__head-decor {
+  position: absolute;
+  top: -70px;
+  left: -90px;
+  width: 640px;
+  height: 380px;
+  background: radial-gradient(
+    ellipse 50% 50% at 32% 38%,
+    var(--accent-soft) 0%,
+    rgba(0, 102, 204, 0.14) 32%,
+    transparent 62%
+  );
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home__status {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.home__status--error {
+  color: var(--danger-soft);
+}
+
+/* 카드 grid - 행(row) 단위로 나눠서 각 행이 최대 2개의 카드만 가지도록 한다. 이렇게
+   하면 화면이 아무리 넓어져도 한 행에 3개가 들어가지 않는다(3열 방지). 각 row는
+   auto-fit이라 카드가 하나만 있으면 자연스럽게 풀폭이 된다. */
+.home__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.home__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 22px;
+  align-items: stretch;
+}
+
+/* 모든 카드가 공유하는 기본 카드 껍데기 (HomeQuickAssistant 포함) */
+.home-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 20px;
+  padding: 26px 28px;
+  box-shadow: var(--shadow-soft);
+}
+
+.home-card__title {
+  font-family: var(--font-family-base);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 14px;
+  color: var(--text-primary);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 오늘의 주요 확인/오늘 일정/다가오는 일정 카드 안의 구분·날짜 배지 */
+.home-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 3px 9px;
+  margin-right: 8px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.home-row-date {
+  display: inline-block;
+  min-width: 56px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-right: 10px;
+}
+
+/* 일정 충돌 항목의 구분 배지 - 오류(빨강)가 아니라 --prep(부드러운 주황) 톤으로,
+   지난 업무/업무 배지와 시각적으로 구분되게 한다. */
+.home-badge--warning {
+  color: var(--prep);
+  background: var(--prep-bg);
+}
+
+/* 업무 우선순위 카드의 각 행을 /tasks로 이동하는 링크로 감싼다 - 링크 밑줄/색상
+   상속 없이 기존 .home-priority-row 모양 그대로 보이게 한다. */
+.home-priority-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.home-priority-link:hover {
+  background: var(--bg-card-soft);
+}
+
+.home-priority-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* 다가오는 일정/업무 탭 - 큰 navigation tab이 아니라 카드 안의 작은 segmented control */
+.home-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 2px 0 14px;
+}
+
+.home-tab {
+  font-size: 12.5px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  padding: 5px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.home-tab:hover {
+  background: var(--bg-card-soft);
+}
+
+.home-tab--active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-soft);
+  font-weight: 600;
+}
+
+.home-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* 카드 제목 역할까지 겸하는 탭 - "다가오는 일정" / "다가오는 업무" 자체가 탭 라벨이다.
+   보통 탭(.home-tab)보다 글자를 조금 키우고, 테두리 없는 좀 더 제목다운 스타일을 쓴다. */
+.briefing-section__head--tabbed {
+  margin-bottom: 14px;
+}
+
+.home-tabs--title {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+}
+
+.home-tab--title {
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.home-tab--title:hover {
+  background: var(--bg-card-soft);
+}
+
+.home-tab--title.home-tab--active {
+  color: var(--text-primary);
+  background: var(--accent-soft);
+}
+
+/* 다가오는 일정의 날짜를 soft block으로 - 너무 화려한 달력 UI는 피하고 은은하게 */
+.home-row-date {
+  min-width: 64px;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg-card-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  padding: 4px 8px;
+  margin-right: 14px;
+}
+
+/* 오늘의 주요 확인 - category/content(좌) + 날짜·상태(우) 정렬. 좁은 화면에서는
+   자연스럽게 다음 줄로 내려간다(줄바꿈 허용, 강제 nowrap 없음). */
+.home-priority-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.home-priority-row__main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.home-priority-row__meta {
+  flex: 0 0 auto;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* 준비할 일정 항목의 준비사항 내용 - 제목과 이어 붙되 톤을 낮춰 부가 설명임을 드러낸다 */
+.home-priority-row__note {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* ===== 퇴근 전 정리 카드 ===== */
+.eod-card {
+  width: 100%;
+}
+
+.eod-card__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0 0 14px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.eod-card__title {
+  margin: 0;
+}
+
+.eod-card__chevron {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* 퇴근 시각 2시간 전 이후에만 살짝 강조 - 색을 바꾸는 대신 테두리/배경만 은은하게
+   덧붙인다(경고가 아니라 안내이므로 --urgent 톤은 쓰지 않는다). */
+.eod-card--emphasized {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.eod-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.eod-summary__pill {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 7px 14px;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.eod-card--emphasized .eod-summary__pill {
+  background: var(--bg-card);
+}
+
+.eod-summary__pill strong {
+  color: var(--accent);
+  font-weight: 700;
+  margin-left: 3px;
+}
+
+.eod-detail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.eod-detail__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+
+.eod-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.eod-list__item {
+  font-size: 13px;
+  color: var(--text-primary);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.eod-empty {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.eod-empty--failed {
+  color: var(--danger-soft);
+}
+
+.eod-more {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 4px 0 0;
+}
+
+@media (max-width: 1100px) {
+  .home {
+    padding: 44px 28px 70px;
+  }
+}
+
+@media (max-width: 640px) {
+  .home {
+    padding: 32px 16px 56px;
+  }
+
+  .home__row {
+    grid-template-columns: 1fr;
+  }
+
+  .home__head {
+    flex-direction: column;
+  }
+
+  .home__head-decor {
+    top: -30px;
+    left: -40px;
+    width: 320px;
+    height: 220px;
+    opacity: 0.28;
+  }
+
+  /* "다가오는 일정/다가오는 업무" 탭 + "전체 보기" 링크가 한 줄에 몰려 여유가 거의 없던
+     문제 - 탭 라벨이 줄바꿈되지 않게 한 상태(위 white-space:nowrap)에서, gap/padding만
+     살짝 줄여 숨 쉴 공간을 넉넉히 확보한다. 구조/폰트 크기는 그대로 유지한다. */
+  .briefing-section__head--tabbed {
+    gap: 6px;
+  }
+
+  .home-tabs--title {
+    gap: 2px;
+  }
+
+  .home-tab--title {
+    padding: 2px 6px;
+  }
+}
