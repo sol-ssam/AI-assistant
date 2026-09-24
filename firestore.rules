@@ -3,37 +3,81 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // settings 컬렉션: 문서 ID가 곧 사용자 uid
+    function isOwner(ownerId) {
+      // Firebase Anonymous(게스트) 사용자도 request.auth != null이므로 자기 데이터에는
+      // 동일하게 접근할 수 있다. 그 외 어떤 사용자에게도 별도의 전체 접근 권한을 주지 않는다.
+      return request.auth != null && request.auth.uid == ownerId;
+    }
+
+    // 실제 화면(EventsPage/TasksPage)·AI 비서 도구(ai/toolExecutors.js)·게스트 샘플 시딩
+    // (demo/initializePreviewData.js)·휴지통 자동 정리(firebase/trashSweep.js)가 생성·조회·
+    // 수정·삭제하는 유일한 업무 데이터 컬렉션. firebase/crud.js의 모든 create*/update*/
+    // delete*/list* 헬퍼는 "events"·"tasks" 문자열만 인자로 받는다(저장소 전체 검색으로 확인).
+    function isActiveDataCollection(collection) {
+      return collection in ['events', 'tasks'];
+    }
+
+    // 예전 교사용 기능(시간표/수업 진도/학사일정/문서 분석 등)이 쓰던 컬렉션. 해당 화면과
+    // 생성·수정 코드는 전부 삭제되어 현재는 어떤 코드도 여기에 새 문서를 만들거나 고치지
+    // 않지만, firebase/resetData.js(설정 > 데이터 초기화)와 demo/cleanupPreviewData.js
+    // (게스트 체험 종료)의 WORK_DATA_COLLECTIONS 목록에는 여전히 남아 있다 - 예전에 이
+    // 기능들을 쓰던 계정에 남아 있을 수 있는 문서를 마저 정리하기 위해서다(ownerId로
+    // 조회한 뒤 batch 삭제). 그래서 read(조회)·delete(정리)만 허용하고, create/update는
+    // 허용하지 않는다 - 더 이상 그 어떤 코드도 이 컬렉션에 쓰기를 시도하지 않기 때문이다.
+    function isLegacyCleanupCollection(collection) {
+      return collection in [
+        'timetable', 'timetable_overrides', 'lesson_plan', 'class_progress',
+        'source_documents', 'homeroom_timetable', 'progress_plans', 'progress_checks',
+        'school_day_schedules', 'lesson_adjustments', 'progress_current', 'progress_history'
+      ];
+    }
+
+    // settings/{uid}: 문서 ID 자체가 Firebase Authentication uid다(ownerId 필드가 아니라
+    // 문서 경로로 소유자를 구분). firebase/settingsService.js는 항상 setDoc(..., {merge:true})
+    // 로 일부 필드만 갱신하므로 create/update를 굳이 나눌 필요는 없지만, 요구된 형식대로
+    // 네 가지 동작을 각각 명시한다.
     match /settings/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid);
+      allow delete: if isOwner(uid);
     }
 
     // 그 외 모든 업무 데이터 컬렉션: ownerId 필드로 소유자를 확인한다.
     match /{collection}/{docId} {
-      allow read: if request.auth != null
-        && collection in ['timetable', 'timetable_overrides', 'lesson_plan',
-                           'class_progress', 'events', 'tasks',
-                           'source_documents', 'homeroom_timetable', 'progress_plans', 'progress_checks', 'school_day_schedules', 'lesson_adjustments', 'progress_current', 'progress_history']
-        && resource.data.ownerId == request.auth.uid;
+      // 활성 컬렉션(events/tasks) + 레거시 정리 대상 컬렉션 모두, 기존 문서의 ownerId가
+      // 요청자 본인일 때만 조회를 허용한다. 단건 조회(get)와 목록 조회(list) 모두 이
+      // 조건이 적용되며, list는 반드시 where("ownerId","==",uid) 필터를 포함하는 쿼리여야
+      // 통과한다(firebase/crud.js의 listDocsByOwner 등이 항상 이렇게 조회한다).
+      allow read: if isOwner(resource.data.ownerId)
+        && (isActiveDataCollection(collection) || isLegacyCleanupCollection(collection));
 
-      allow create: if request.auth != null
-        && collection in ['timetable', 'timetable_overrides', 'lesson_plan',
-                           'class_progress', 'events', 'tasks',
-                           'source_documents', 'homeroom_timetable', 'progress_plans', 'progress_checks', 'school_day_schedules', 'lesson_adjustments', 'progress_current', 'progress_history']
-        && request.resource.data.ownerId == request.auth.uid;
+      // 새 문서 생성은 활성 컬렉션(events/tasks)에서만 허용한다. 레거시 컬렉션에는 그 어떤
+      // 코드도 더 이상 새 문서를 만들지 않으므로 생성 자체를 막는다. 생성되는 문서의
+      // ownerId가 반드시 요청자 본인이어야 한다 - 다른 사용자의 uid를 ownerId로 넣어
+      // 생성할 수 없다.
+      allow create: if isOwner(request.resource.data.ownerId)
+        && isActiveDataCollection(collection);
 
-      allow update: if request.auth != null
-        && collection in ['timetable', 'timetable_overrides', 'lesson_plan',
-                           'class_progress', 'events', 'tasks',
-                           'source_documents', 'homeroom_timetable', 'progress_plans', 'progress_checks', 'school_day_schedules', 'lesson_adjustments', 'progress_current', 'progress_history']
-        && resource.data.ownerId == request.auth.uid
-        && request.resource.data.ownerId == request.auth.uid;
+      // 수정도 활성 컬렉션(events/tasks)에서만 허용한다. 휴지통 이동/복원(deletedAt·
+      // deleteReason 추가·삭제), 완료 처리, 반복 일정 등 모든 update 경로가 ownerId
+      // 필드는 전혀 건드리지 않으므로, 수정 전후 ownerId가 모두 요청자 본인이어야 한다는
+      // 조건은 기존 기능을 막지 않으면서 ownerId 변경/탈취 시도만 차단한다.
+      allow update: if isActiveDataCollection(collection)
+        && isOwner(resource.data.ownerId)
+        && isOwner(request.resource.data.ownerId);
 
-      allow delete: if request.auth != null
-        && collection in ['timetable', 'timetable_overrides', 'lesson_plan',
-                           'class_progress', 'events', 'tasks',
-                           'source_documents', 'homeroom_timetable', 'progress_plans', 'progress_checks', 'school_day_schedules', 'lesson_adjustments', 'progress_current', 'progress_history']
-        && resource.data.ownerId == request.auth.uid;
+      // 삭제는 활성 컬렉션(events/tasks: 휴지통 영구 삭제, 전체 초기화, 게스트 종료)과
+      // 레거시 컬렉션(정리 목적) 모두에서, 기존 문서의 ownerId가 본인일 때만 허용한다.
+      allow delete: if isOwner(resource.data.ownerId)
+        && (isActiveDataCollection(collection) || isLegacyCleanupCollection(collection));
+    }
+
+    // 위에서 명시적으로 허용하지 않은 모든 경로(나열되지 않은 컬렉션, 그 아래의 모든
+    // 하위 컬렉션 포함)는 기본적으로 거부한다. Firestore Rules는 기본값 자체가
+    // "거부"이므로 이 블록이 없어도 동작은 같지만, 의도를 명확히 하기 위해 남긴다.
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
