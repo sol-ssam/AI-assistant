@@ -6,7 +6,7 @@ import { maskPII } from "./piiMask";
 // AI 일정 비서(session.js)와 같은 모델을 쓰되, 이 값은 session.js의 MODEL_NAME과 완전히
 // 분리된 상수다 - 모델을 바꿀 때는 두 파일을 함께 수정해야 한다. 일정 비서 쪽 모델명/동작은
 // 이 파일에서 절대 건드리지 않는다.
-const MODEL_NAME = "gemini-3.1-flash-lite";
+const MODEL_NAME = "gemini-3.5-flash-lite";
 
 // "other"(기타)는 여기 없다 - 그 경우 사용자가 직접 입력한 유형명(customTypeLabel)을
 // 그대로 "작성 형식"에 보낸다. "기타"라는 단어 자체는 AI에 전달하지 않는다(요구사항).
