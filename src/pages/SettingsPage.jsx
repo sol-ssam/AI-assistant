@@ -382,8 +382,16 @@ export default function SettingsPage() {
         </div>
 
         <div className="work-hours-field">
-          <span className="work-hours-field__label">집중 시간 기준</span>
-          <div className="work-hours-days" role="group" aria-label="집중 시간으로 인정할 최소 시간">
+          <span className="work-hours-field__label work-hours-field__label--with-hint">업무 집중 가능 시간</span>
+          <p className="work-hours-field__hint" id="settings-focus-min-hint">
+            선택한 시간 이상 일정이 비어 있으면, AI가 업무에 집중할 수 있는 시간으로 알려줘요.
+          </p>
+          <div
+            className="work-hours-days"
+            role="group"
+            aria-label="집중 시간으로 인정할 최소 시간"
+            aria-describedby="settings-focus-min-hint"
+          >
             {FOCUS_MIN_OPTIONS.map((min) => (
               <button
                 key={min}
