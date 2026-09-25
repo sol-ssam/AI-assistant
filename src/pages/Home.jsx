@@ -480,9 +480,9 @@ export default function Home() {
                   ) : (
                     <ul className="briefing-section__list">
                       {data.upcomingEvents.slice(0, UPCOMING_DISPLAY_LIMIT).map((e, i) => (
-                        <li key={e.id ?? i} className="briefing-section__item">
+                        <li key={e.id ?? i} className="briefing-section__item home-upcoming-item">
                           <span className="home-row-date">{formatDateDisplay(e.date)}</span>
-                          {e.title}
+                          <span className="home-row-title">{e.title}</span>
                         </li>
                       ))}
                     </ul>
@@ -496,11 +496,11 @@ export default function Home() {
                 ) : (
                   <ul className="briefing-section__list">
                     {upcomingTasksForCard.slice(0, UPCOMING_DISPLAY_LIMIT).map((t) => (
-                      <li key={t.id} className="briefing-section__item">
+                      <li key={t.id} className="briefing-section__item home-upcoming-item">
                         <span className="home-row-date">
                           {t.dueDate === todayDateString() ? "오늘" : formatDateDisplay(t.dueDate)}
                         </span>
-                        {t.title}
+                        <span className="home-row-title">{t.title}</span>
                       </li>
                     ))}
                   </ul>

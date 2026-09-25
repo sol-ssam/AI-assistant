@@ -135,7 +135,14 @@ export default function HomeQuickAssistant() {
           aria-label="AI 비서에게 말하기"
         />
         <button type="submit" disabled={loading || !!sensitiveWarning || !input.trim()} aria-label="보내기">
-          {loading ? "…" : "➤"}
+          {loading ? (
+            "…"
+          ) : (
+            <>
+              <span aria-hidden="true">➤</span>
+              <span className="home-quick-assistant__send-label">보내기</span>
+            </>
+          )}
         </button>
       </form>
       <p className="home-quick-assistant__hint">
