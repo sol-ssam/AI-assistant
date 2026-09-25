@@ -98,6 +98,26 @@ function ConflictWarning({ conflicts }) {
   );
 }
 
+// 개발자 확인용 로그에는 사용자가 입력한 제목·메모 등이 섞일 수 있는 error.message를 남기지
+// 않고, 오류 종류(code/name)만 남긴다.
+function safeErrorInfo(err) {
+  return err?.code ?? err?.name ?? "unknown";
+}
+
+// 등록/수정 form 안에 표시하는 저장 실패 안내 - 페이지의 기존 결과 메시지(.ep-result-message)와
+// 같은 구조·스타일에 닫기 버튼을 붙이고, role="alert"로 스크린리더에 즉시 알린다.
+function SaveErrorMessage({ message, onClose }) {
+  if (!message) return null;
+  return (
+    <div className="ep-result-message" role="alert">
+      <p className="status status--error">{message.text}</p>
+      <button type="button" className="btn-text" aria-label="오류 메시지 닫기" onClick={onClose}>
+        닫기
+      </button>
+    </div>
+  );
+}
+
 // 등록 form과 인라인 수정 form이 완전히 동일한 필드 UI를 공유한다(중복 방지). 각 form은
 // 자기 자신의 state(신규 등록용 form, 또는 그 항목만의 editForm)와 오류 state를 따로 갖고
 // 이 컴포넌트에 넘겨줄 뿐이다.
@@ -338,6 +358,9 @@ export default function EventsPage() {
   const [createForm, setCreateForm] = useState(emptyForm);
   const [creating, setCreating] = useState(false);
   const [createCalendarWarning, setCreateCalendarWarning] = useState(null);
+  // Firestore 저장 실패 안내(폼은 그대로 열려 있고 입력값도 유지된다). 값 형태: { text } | null.
+  // Calendar 동기화 실패(저장은 성공)를 알리는 createResultMessage와는 별개다.
+  const [createSaveError, setCreateSaveError] = useState(null);
   // 폼이 닫힌 뒤에도 사용자가 확인해야 하는 결과 메시지 - 반복 등록 성공 안내("N건
   // 등록했어요")뿐 아니라, 단건 등록/수정 자체는 성공했지만 Google Calendar 동기화만
   // 실패한 경우의 경고도 여기로 전달한다. createCalendarWarning/editCalendarWarning은
@@ -354,6 +377,9 @@ export default function EventsPage() {
   const [editForm, setEditForm] = useState(emptyForm);
   const [editSaving, setEditSaving] = useState(false);
   const [editCalendarWarning, setEditCalendarWarning] = useState(null);
+  const [editSaveError, setEditSaveError] = useState(null);
+  // 준비 완료 체크를 저장하는 중인 일정 id - 저장이 끝나기 전 중복 클릭을 막는다.
+  const [prepUpdatingId, setPrepUpdatingId] = useState(null);
   const editErrors = useFieldErrors();
   const onEditChange = editErrors.withErrorClearing(setEditForm);
 
@@ -401,6 +427,7 @@ export default function EventsPage() {
     setShowCreateForm(false);
     setCreateForm(emptyForm);
     setCreateCalendarWarning(null);
+    setCreateSaveError(null);
     createErrors.clearAll();
   }
 
@@ -408,6 +435,7 @@ export default function EventsPage() {
     setShowCreateForm(false); // 한 번에 하나의 form만 - 신규 등록 form이 열려 있으면 닫는다.
     setEditingId(ev.id);
     setEditCalendarWarning(null);
+    setEditSaveError(null);
     editErrors.clearAll();
     setEditForm({
       title: ev.title ?? "",
@@ -431,6 +459,7 @@ export default function EventsPage() {
     setEditingId(null);
     setEditForm(emptyForm);
     setEditCalendarWarning(null);
+    setEditSaveError(null);
     editErrors.clearAll();
   }
 
@@ -446,10 +475,11 @@ export default function EventsPage() {
   // 신규 등록/기존 수정이 공유하는 저장 로직. existingEvent가 있으면 그 document를
   // update하고(Firestore ID 유지, 새 document 생성 안 함), 없으면 새로 생성한다.
   // Google Calendar 연동(생성/PATCH) 로직은 기존 그대로다.
-  async function saveEvent(formState, existingEvent, { setSaving, setWarning, onDone }) {
+  async function saveEvent(formState, existingEvent, { setSaving, setWarning, setSaveError, onDone }) {
     if (!formState.title || !formState.date) return;
     setSaving(true);
     setWarning(null);
+    setSaveError(null);
     // 새로운 저장을 시작하면 이전에 남아 있던 결과 메시지(예: 지난 Calendar 동기화 실패
     // 경고)는 이번 저장과 무관해지므로 지운다.
     setCreateResultMessage(null);
@@ -481,6 +511,9 @@ export default function EventsPage() {
     // 성공하면 이 값으로 폼이 닫힌 뒤에도 남는 경고를 보여줄지, 어떤 문구를 보여줄지
     // 판단한다. null이면 동기화를 시도하지 않았거나 성공한 것이다.
     let calendarSyncFailureReason = null; // "missingEndTime" | "noToken" | "syncFailed" | null
+    // Calendar 생성/수정 요청 자체는 성공했는지 - 이후 Firestore 저장이 실패했을 때 "Calendar에는
+    // 반영됐지만 앱에는 저장되지 못한" 부분 성공 상태를 정확히 안내하기 위한 표시다.
+    let calendarWriteSucceeded = false;
 
     try {
       if (formState.addToCalendar && eligibleNow) {
@@ -498,13 +531,14 @@ export default function EventsPage() {
               googleCalendarId = await createCalendarEvent(token, basePayload);
             }
             calendarSync = true;
+            calendarWriteSucceeded = true;
           } catch (err) {
             calendarSync = false;
             if (err instanceof MissingEndTimeError) {
               setWarning(err.message);
               calendarSyncFailureReason = "missingEndTime";
             } else {
-              console.error("[Calendar] sync failed:", err);
+              console.error("[Calendar] sync failed:", err?.status ?? safeErrorInfo(err));
               setWarning("일정은 저장되었지만 Google Calendar 동기화에 실패했습니다.");
               calendarSyncFailureReason = "syncFailed";
             }
@@ -552,6 +586,23 @@ export default function EventsPage() {
 
       onDone();
       load();
+    } catch (err) {
+      console.error("[Events] save failed:", safeErrorInfo(err));
+      // Firestore 저장이 성공하지 못했으므로, 위에서 잠깐 표시했을 수 있는 "일정은 저장되었지만
+      // ..." 류의 Calendar 경고는 사실과 다르다 - 지우고 저장 실패 안내로 바꾼다. 폼은
+      // 닫지 않고 입력값도 그대로 둔다. Calendar 쪽은 자동으로 되돌리거나 다시 호출하지 않는다.
+      setWarning(null);
+      let text;
+      if (calendarWriteSucceeded) {
+        text = existingEvent
+          ? "Google Calendar에는 변경 내용이 반영되었지만 앱의 일정 변경 내용을 저장하지 못했습니다. Calendar와 앱의 내용이 다를 수 있으니 확인해 주세요."
+          : "Google Calendar에는 일정이 반영되었지만 앱에 저장하지 못했습니다. 중복 등록을 피하려면 Calendar 일정을 확인한 뒤 다시 시도해 주세요.";
+      } else {
+        text = existingEvent
+          ? "일정 변경 내용을 저장하지 못했습니다. 입력한 내용을 유지했으니 다시 시도해 주세요."
+          : "일정을 저장하지 못했습니다. 입력한 내용을 유지했으니 잠시 후 다시 시도해 주세요.";
+      }
+      setSaveError({ text });
     } finally {
       setSaving(false);
     }
@@ -575,6 +626,7 @@ export default function EventsPage() {
 
     setCreating(true);
     setCreateCalendarWarning(null);
+    setCreateSaveError(null);
     setCreateResultMessage(null);
     try {
       const now = new Date().toISOString();
@@ -612,8 +664,12 @@ export default function EventsPage() {
       setCreateResultMessage({ text: `반복 일정 ${docs.length}건을 등록했습니다.`, tone: "success" });
       load();
     } catch (err) {
-      console.error("[Recurring event] batch create failed:", err);
-      setCreateCalendarWarning("반복 일정을 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+      console.error("[Recurring event] batch create failed:", safeErrorInfo(err));
+      // batch는 원자적이라 일부 회차만 저장되지 않는다 - 성공 메시지/건수 없이 실패만 안내하고,
+      // 폼과 입력값은 그대로 둔다.
+      setCreateSaveError({
+        text: "반복 일정을 등록하지 못했습니다. 입력한 내용을 유지했으니 잠시 후 다시 시도해 주세요.",
+      });
     } finally {
       setCreating(false);
     }
@@ -621,6 +677,7 @@ export default function EventsPage() {
 
   function submitCreate(e) {
     e.preventDefault();
+    if (creating) return;
     if (!createErrors.runValidation(validateEventForm(createForm))) return;
 
     if (createForm.repeatType && createForm.repeatType !== "none") {
@@ -628,21 +685,49 @@ export default function EventsPage() {
       return;
     }
 
-    saveEvent(createForm, null, { setSaving: setCreating, setWarning: setCreateCalendarWarning, onDone: closeCreateForm });
+    saveEvent(createForm, null, {
+      setSaving: setCreating,
+      setWarning: setCreateCalendarWarning,
+      setSaveError: setCreateSaveError,
+      onDone: closeCreateForm,
+    });
   }
 
   function submitEdit(e) {
     e.preventDefault();
+    if (editSaving) return;
     if (!editErrors.runValidation(validateEventForm(editForm))) return;
     const existing = events.find((ev) => ev.id === editingId);
-    saveEvent(editForm, existing, { setSaving: setEditSaving, setWarning: setEditCalendarWarning, onDone: cancelEdit });
+    saveEvent(editForm, existing, {
+      setSaving: setEditSaving,
+      setWarning: setEditCalendarWarning,
+      setSaveError: setEditSaveError,
+      onDone: cancelEdit,
+    });
   }
 
   // 카드의 "준비 완료" 체크 - 해당 일정 문서의 준비 완료 필드만 수정한다. 일정 자체의
   // 완료/취소(status)나 Google Calendar에는 영향을 주지 않는다(요구사항).
+  // 저장이 실패하면 events state를 건드리지 않으므로(낙관적 갱신 없음) 체크 상태는 실제
+  // Firestore 값 그대로 남는다. 이전 준비사항 오류(source: "preparation")만 지우고, 아직
+  // 확인하지 않은 Calendar 동기화 경고 등 다른 결과 메시지는 그대로 둔다.
   async function togglePreparation(ev) {
-    await updateDocById("events", ev.id, { preparationCompleted: !ev.preparationCompleted });
-    load();
+    if (prepUpdatingId) return;
+    setPrepUpdatingId(ev.id);
+    setCreateResultMessage((prev) => (prev?.source === "preparation" ? null : prev));
+    try {
+      await updateDocById("events", ev.id, { preparationCompleted: !ev.preparationCompleted });
+      load();
+    } catch (err) {
+      console.error("[Events] preparation toggle failed:", safeErrorInfo(err));
+      setCreateResultMessage({
+        text: "준비사항 상태를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+        tone: "warning",
+        source: "preparation",
+      });
+    } finally {
+      setPrepUpdatingId(null);
+    }
   }
 
   // 일반 목록의 삭제 버튼 - 더 이상 Firestore에서 완전히 지우지 않고 휴지통으로
@@ -786,6 +871,7 @@ export default function EventsPage() {
           excludeId={ev.id}
         />
         {editCalendarWarning && <p className="status status--error">{editCalendarWarning}</p>}
+        <SaveErrorMessage message={editSaveError} onClose={() => setEditSaveError(null)} />
         <div className="form__actions">
           <button type="submit" className="btn" disabled={editSaving}>
             {editSaving ? "저장 중…" : "저장"}
@@ -877,6 +963,7 @@ export default function EventsPage() {
                   Google Calendar 연동은 설정에서 연결 정보를 등록한 뒤 사용할 수 있습니다.
                 </p>
               )}
+              <SaveErrorMessage message={createSaveError} onClose={() => setCreateSaveError(null)} />
               <div className="form__actions">
                 <button type="submit" className="btn" disabled={creating}>
                   {creating ? "저장 중…" : "추가"}
@@ -889,7 +976,11 @@ export default function EventsPage() {
           )}
           {createCalendarWarning && <p className="status status--error">{createCalendarWarning}</p>}
           {createResultMessage && (
-            <div className="ep-result-message" role="status" aria-live="polite">
+            <div
+              className="ep-result-message"
+              role={createResultMessage.tone === "warning" ? "alert" : "status"}
+              aria-live={createResultMessage.tone === "warning" ? "assertive" : "polite"}
+            >
               <p className={"status" + (createResultMessage.tone === "warning" ? " status--error" : "")}>
                 {createResultMessage.text}
               </p>
@@ -964,6 +1055,7 @@ export default function EventsPage() {
                                               <input
                                                 type="checkbox"
                                                 checked={!!ev.preparationCompleted}
+                                                disabled={prepUpdatingId === ev.id}
                                                 onChange={() => togglePreparation(ev)}
                                               />
                                               준비 완료

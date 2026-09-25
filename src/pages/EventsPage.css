@@ -150,6 +150,15 @@
   margin: 12px 0;
 }
 
+/* 등록/수정 폼 안에 표시하는 저장 실패 안내 - 폼(flex wrap) 안에서 한 줄 전체 폭을 쓴다. */
+.ep-form .ep-result-message {
+  width: 100%;
+}
+
+.ep-form .ep-result-message .status {
+  margin: 4px 0;
+}
+
 /* ===== 날짜별 그룹 ===== */
 .ep-groups {
   display: flex;

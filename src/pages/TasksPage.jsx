@@ -33,6 +33,25 @@ function validateTaskForm(values) {
   return errors;
 }
 
+// 개발자 확인용 로그에는 사용자가 입력한 업무명·메모 등이 섞일 수 있는 error.message를 남기지
+// 않고, 오류 종류(code/name)만 남긴다.
+function safeErrorInfo(err) {
+  return err?.code ?? err?.name ?? "unknown";
+}
+
+// 저장·상태 변경 실패 안내 - role="alert"로 스크린리더에 즉시 알리고, 닫기 버튼을 둔다.
+function ErrorMessage({ message, onClose }) {
+  if (!message) return null;
+  return (
+    <div className="tp-message" role="alert">
+      <p className="status status--error">{message}</p>
+      <button type="button" className="btn-text" aria-label="오류 메시지 닫기" onClick={onClose}>
+        닫기
+      </button>
+    </div>
+  );
+}
+
 // 등록 form과 인라인 수정 form이 완전히 동일한 필드 UI를 공유한다. showRepeatOptions:
 // 반복 등록 UI는 새 업무 등록 폼에서만 보여준다(요구사항: 수정 시에는 추가 회차를
 // 생성하지 않는다) - 수정 폼 호출부는 이 prop을 넘기지 않아 기본값 false로 숨겨진다.
@@ -142,11 +161,18 @@ export default function TasksPage() {
   // 삭제(휴지통 이동) 실패 안내 - 성공 시에는 createResultMessage를 쓰고, 실패했을 때만
   // 별도로 표시한다("성공 안내를 보여주지 않고 오류 안내를 보여준다"는 요구사항).
   const [removeError, setRemoveError] = useState(null);
+  // Firestore 저장 실패 안내(폼은 그대로 열려 있고 입력값도 유지된다).
+  const [createError, setCreateError] = useState(null);
+  // 완료/완료 취소 체크 저장 실패 안내, 그리고 저장 중인 업무 id(중복 클릭 방지).
+  const [completionError, setCompletionError] = useState(null);
+  const [togglingId, setTogglingId] = useState(null);
   const createErrors = useFieldErrors();
   const onCreateChange = createErrors.withErrorClearing(setCreateForm);
 
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(emptyForm);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState(null);
   const editErrors = useFieldErrors();
   const onEditChange = editErrors.withErrorClearing(setEditForm);
 
@@ -178,12 +204,14 @@ export default function TasksPage() {
   function closeCreateForm() {
     setShowCreateForm(false);
     setCreateForm(emptyForm);
+    setCreateError(null);
     createErrors.clearAll();
   }
 
   function startEdit(t) {
     setShowCreateForm(false); // 한 번에 하나의 form만 - 신규 등록 form이 열려 있으면 닫는다.
     setEditingId(t.id);
+    setEditError(null);
     editErrors.clearAll();
     setEditForm({
       title: t.title ?? "",
@@ -196,6 +224,7 @@ export default function TasksPage() {
   function cancelEdit() {
     setEditingId(null);
     setEditForm(emptyForm);
+    setEditError(null);
     editErrors.clearAll();
   }
 
@@ -224,6 +253,7 @@ export default function TasksPage() {
     }
 
     setCreating(true);
+    setCreateError(null);
     setCreateResultMessage(null);
     try {
       const now = new Date().toISOString();
@@ -249,8 +279,10 @@ export default function TasksPage() {
       setCreateResultMessage(`반복 업무 ${docs.length}건을 등록했습니다.`);
       load();
     } catch (err) {
-      console.error("[Recurring task] batch create failed:", err);
-      createErrors.runValidation({ repeatEndDate: "반복 업무를 등록하지 못했습니다. 잠시 후 다시 시도해 주세요." });
+      console.error("[Recurring task] batch create failed:", safeErrorInfo(err));
+      // batch는 원자적이라 일부 회차만 저장되지 않는다 - 성공 메시지/건수 없이 실패만 안내하고,
+      // 폼과 입력값은 그대로 둔다. 입력란 검증 오류(repeatEndDate)가 아니므로 폼 수준 안내로 보인다.
+      setCreateError("반복 업무를 등록하지 못했습니다. 입력한 내용을 유지했으니 잠시 후 다시 시도해 주세요.");
     } finally {
       setCreating(false);
     }
@@ -258,6 +290,7 @@ export default function TasksPage() {
 
   async function submitCreate(e) {
     e.preventDefault();
+    if (creating) return;
     if (!createErrors.runValidation(validateTaskForm(createForm))) return;
 
     if (createForm.repeatType && createForm.repeatType !== "none") {
@@ -266,6 +299,7 @@ export default function TasksPage() {
     }
 
     setCreating(true);
+    setCreateError(null);
     try {
       const now = new Date().toISOString();
       // repeatType/repeatEndDate는 폼 state에만 있는 값이다 - 일반 단건 업무 문서에는
@@ -282,6 +316,9 @@ export default function TasksPage() {
       });
       closeCreateForm();
       load();
+    } catch (err) {
+      console.error("[Tasks] create failed:", safeErrorInfo(err));
+      setCreateError("업무를 저장하지 못했습니다. 입력한 내용을 유지했으니 잠시 후 다시 시도해 주세요.");
     } finally {
       setCreating(false);
     }
@@ -289,24 +326,46 @@ export default function TasksPage() {
 
   async function submitEdit(e) {
     e.preventDefault();
+    if (editSaving) return;
     if (!editErrors.runValidation(validateTaskForm(editForm))) return;
-    // 기존 update 로직 그대로 - Firestore document ID(editingId) 유지, 새 document 생성 안 함.
-    await updateDocById("tasks", editingId, { ...editForm, updatedAt: new Date().toISOString() });
-    cancelEdit();
-    load();
+    setEditSaving(true);
+    setEditError(null);
+    try {
+      // 기존 update 로직 그대로 - Firestore document ID(editingId) 유지, 새 document 생성 안 함.
+      await updateDocById("tasks", editingId, { ...editForm, updatedAt: new Date().toISOString() });
+      cancelEdit();
+      load();
+    } catch (err) {
+      console.error("[Tasks] update failed:", safeErrorInfo(err));
+      setEditError("업무 변경 내용을 저장하지 못했습니다. 입력한 내용을 유지했으니 다시 시도해 주세요.");
+    } finally {
+      setEditSaving(false);
+    }
   }
 
   // 체크박스 하나로 완료<->미완료를 전환한다. 완료 처리 시 completedAt을 현재 시각으로
   // 기록하고, 완료 취소 시에는 null로 지운다 - AI 비서의 completeTask와 정확히 같은
   // 형식(ISO 문자열)이다. 퇴근 전 정리("오늘 완료한 업무")가 이 값을 읽는다.
+  // 저장이 실패하면 tasks state를 건드리지 않으므로(낙관적 갱신 없음) 체크 상태는 실제
+  // Firestore 값 그대로 남는다.
   async function toggleCompleted(t) {
+    if (togglingId) return;
     const completing = !t.completed;
-    await updateDocById("tasks", t.id, {
-      completed: completing,
-      completedAt: completing ? new Date().toISOString() : null,
-      updatedAt: new Date().toISOString(),
-    });
-    load();
+    setTogglingId(t.id);
+    setCompletionError(null);
+    try {
+      await updateDocById("tasks", t.id, {
+        completed: completing,
+        completedAt: completing ? new Date().toISOString() : null,
+        updatedAt: new Date().toISOString(),
+      });
+      load();
+    } catch (err) {
+      console.error("[Tasks] completion toggle failed:", safeErrorInfo(err));
+      setCompletionError("업무 완료 상태를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setTogglingId(null);
+    }
   }
 
   // 삭제 버튼 - 더 이상 Firestore에서 완전히 지우지 않고 휴지통으로 이동(soft delete)만
@@ -397,6 +456,7 @@ export default function TasksPage() {
                 idPrefix="task-create"
                 showRepeatOptions
               />
+              <ErrorMessage message={createError} onClose={() => setCreateError(null)} />
               <div className="form__actions">
                 <button type="submit" className="btn" disabled={creating}>
                   {creating ? "저장 중…" : "추가"}
@@ -409,6 +469,7 @@ export default function TasksPage() {
           )}
           {createResultMessage && <p className="status">{createResultMessage}</p>}
           {removeError && <p className="status status--error">{removeError}</p>}
+          <ErrorMessage message={completionError} onClose={() => setCompletionError(null)} />
 
           <div className="tp-list">
             {visible.length === 0 && (
@@ -431,9 +492,10 @@ export default function TasksPage() {
                     registerField={editErrors.registerField}
                     idPrefix="task-edit"
                   />
+                  <ErrorMessage message={editError} onClose={() => setEditError(null)} />
                   <div className="form__actions">
-                    <button type="submit" className="btn">
-                      저장
+                    <button type="submit" className="btn" disabled={editSaving}>
+                      {editSaving ? "저장 중…" : "저장"}
                     </button>
                     <button type="button" className="btn btn--ghost" onClick={cancelEdit}>
                       취소
@@ -446,6 +508,7 @@ export default function TasksPage() {
                     <input
                       type="checkbox"
                       checked={!!t.completed}
+                      disabled={togglingId === t.id}
                       onChange={() => toggleCompleted(t)}
                       aria-label={t.completed ? `${t.title} 완료 취소` : `${t.title} 완료 처리`}
                     />

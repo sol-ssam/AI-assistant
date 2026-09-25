@@ -76,6 +76,22 @@
   color: var(--danger-soft);
 }
 
+/* 저장·상태 변경 실패 안내 + 닫기 버튼 한 줄 - 등록/수정 폼 안에서는 전체 폭을 쓴다. */
+.tp-message {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tp-message .status {
+  margin: 4px 0;
+}
+
+.tasks-page .form .tp-message {
+  width: 100%;
+}
+
 .tasks-page .list--empty {
   font-size: 13.5px;
   color: var(--text-secondary);
