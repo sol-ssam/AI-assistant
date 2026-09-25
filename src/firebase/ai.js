@@ -14,10 +14,7 @@ let aiInstance = null;
 
 export function getAIInstance() {
   if (!aiInstance) {
-    aiInstance = getAI(app, {
-      backend: new GoogleAIBackend(),
-      useLimitedUseAppCheckTokens: true,
-    });
+    aiInstance = getAI(app, { backend: new GoogleAIBackend() });
   }
   return aiInstance;
 }
